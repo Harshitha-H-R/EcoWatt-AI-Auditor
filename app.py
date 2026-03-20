@@ -2,13 +2,17 @@ import streamlit as st
 import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
+
+# ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="EcoWatt India",
     page_icon="E",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
-{
+
+# ── Appliance data (no emojis) ────────────────────────────────────────────────
+APPLIANCES = {
     "LED Bulb (9W)":            9,
     "Tube Light (40W)":         40,
     "Ceiling Fan (75W)":        75,
@@ -26,11 +30,15 @@ st.set_page_config(
     "EV Charger (3300W)":       3300,
 }
 
-RATE_PER_UNIT = 6.5 
+RATE_PER_UNIT = 6.5   # Rs / kWh
+
+# ── Session state ─────────────────────────────────────────────────────────────
 if "page" not in st.session_state:
     st.session_state.page = "home"
 if "prev_page" not in st.session_state:
     st.session_state.prev_page = "home"
+
+# ── Global CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700&display=swap');
@@ -44,6 +52,8 @@ st.markdown("""
     --bg-glass:  rgba(255,255,255,0.93);
     --text:      #0a0a0a;
 }
+
+/* Background */
 .stApp {
     background:
         linear-gradient(135deg, rgba(0,18,36,0.93) 0%, rgba(0,45,65,0.90) 100%),
@@ -54,6 +64,8 @@ st.markdown("""
 
 #MainMenu, footer, header { visibility: hidden; }
 .block-container { padding-top: 1rem !important; padding-bottom: 2rem !important; }
+
+/* Navbar */
 .ecowatt-nav {
     display: flex;
     align-items: center;
@@ -81,12 +93,15 @@ st.markdown("""
     letter-spacing: 2px;
     margin-top: -4px;
 }
+
+/* Slide animation */
 @keyframes slideInRight {
     from { opacity: 0; transform: translateX(55px); }
     to   { opacity: 1; transform: translateX(0); }
 }
 .page-wrapper { animation: slideInRight 0.45s cubic-bezier(0.25,0.8,0.25,1) both; }
 
+/* Glass card */
 .glass-card {
     background: var(--bg-glass);
     backdrop-filter: blur(22px);
@@ -99,6 +114,8 @@ st.markdown("""
     color: var(--text) !important;
 }
 .glass-card * { color: var(--text) !important; }
+
+/* Stat row */
 .stat-row { display: flex; gap: 16px; margin: 18px 0; flex-wrap: wrap; }
 .stat-card {
     flex: 1; min-width: 130px;
@@ -125,6 +142,8 @@ st.markdown("""
     letter-spacing: 1px;
     font-weight: 600;
 }
+
+/* Main buttons */
 .stButton > button {
     background: linear-gradient(135deg, var(--teal), var(--teal-dark)) !important;
     color: #000000 !important;
@@ -142,6 +161,8 @@ st.markdown("""
     transform: translateY(-3px) scale(1.03) !important;
     box-shadow: 0 0 0 3px var(--teal), 0 8px 28px var(--teal-glow) !important;
 }
+
+/* Nav buttons */
 .nav-btn > button {
     background: transparent !important;
     color: #ffffff !important;
@@ -157,6 +178,7 @@ st.markdown("""
     transform: translateY(-2px) !important;
 }
 
+/* ALL INPUTS: white bg, black text, teal border */
 input, textarea,
 div[data-baseweb="input"] input,
 div[data-baseweb="textarea"] textarea,
@@ -180,6 +202,8 @@ div[data-baseweb="input"] input:focus,
     box-shadow: 0 0 0 3px var(--teal-glow) !important;
     outline: none !important;
 }
+
+/* Multiselect */
 div[data-baseweb="select"] > div,
 div[data-baseweb="select"] [role="combobox"] {
     background-color: #ffffff !important;
@@ -199,6 +223,8 @@ div[data-baseweb="popover"] {
     border: 2px solid var(--teal) !important;
     border-radius: 10px !important;
 }
+
+/* Number input wrapper */
 .stNumberInput > div > div {
     background: #ffffff !important;
     border: 2.5px solid var(--teal) !important;
@@ -209,12 +235,16 @@ div[data-baseweb="popover"] {
     color: #000 !important;
     border: none !important;
 }
+
+/* Labels — pitch black for max visibility */
 .stMultiSelect label, .stNumberInput label, .stSelectbox label,
 .stTextInput label, .stSlider label {
     color: #000000 !important;
     font-weight: 700 !important;
     font-size: 0.93rem !important;
 }
+
+/* Section titles */
 .section-title {
     font-family: 'Orbitron', monospace;
     font-size: 1.05rem;
@@ -225,6 +255,8 @@ div[data-baseweb="popover"] {
     padding-bottom: 8px;
     margin-bottom: 18px;
 }
+
+/* Tip cards */
 .tip-card {
     border-radius: 12px;
     padding: 14px 18px;
@@ -239,6 +271,8 @@ div[data-baseweb="popover"] {
 .tip-2 { background: rgba(255,183,3,0.14);  border-color: var(--amber); }
 .tip-3 { background: rgba(255,107,107,0.14);border-color: var(--coral); }
 .tip-card b { color: #000000 !important; }
+
+/* Hero */
 .hero-title {
     font-family: 'Orbitron', monospace;
     font-size: clamp(1.9rem, 5vw, 3.4rem);
@@ -256,6 +290,7 @@ div[data-baseweb="popover"] {
     line-height: 1.75;
 }
 
+/* Feature grid */
 .feat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; margin-top: 26px; }
 .feat-item {
     background: rgba(255,255,255,0.92);
@@ -273,6 +308,8 @@ div[data-baseweb="popover"] {
 }
 .feat-title { font-weight: 700; font-size: 0.93rem; color: #000000 !important; margin-bottom: 6px; }
 .feat-desc  { font-size: 0.80rem; color: #111111 !important; line-height: 1.55; }
+
+/* AI culprit badge */
 .culprit-badge {
     background: linear-gradient(135deg, rgba(255,107,107,0.16), rgba(255,183,3,0.10));
     border: 2px solid var(--coral);
@@ -286,6 +323,8 @@ div[data-baseweb="popover"] {
 }
 .culprit-badge b { color: #000000 !important; }
 .culprit-name { color: #c0392b !important; font-size: 1.05rem; font-weight: 800; }
+
+/* Compare header */
 .compare-header {
     font-family: 'Orbitron', monospace;
     font-size: 0.72rem;
@@ -295,6 +334,8 @@ div[data-baseweb="popover"] {
     margin-bottom: 8px;
     font-weight: 700;
 }
+
+/* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
 ::-webkit-scrollbar-thumb { background: var(--teal); border-radius: 6px; }
@@ -302,9 +343,15 @@ div[data-baseweb="popover"] {
 .js-plotly-plot .plotly, .js-plotly-plot .plotly .main-svg { background: transparent !important; }
 </style>
 """, unsafe_allow_html=True)
+
+
+# ── Navigation helper ─────────────────────────────────────────────────────────
 def nav_to(page: str):
     st.session_state.prev_page = st.session_state.page
     st.session_state.page = page
+
+
+# ── Navbar ────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div class="ecowatt-nav">
   <div>
@@ -333,6 +380,10 @@ with col_n3:
 
 st.markdown("")
 
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  HOME
+# ══════════════════════════════════════════════════════════════════════════════
 if st.session_state.page == "home":
     st.markdown('<div class="page-wrapper">', unsafe_allow_html=True)
 
@@ -413,6 +464,11 @@ if st.session_state.page == "home":
     """, unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  CALCULATE
+# ══════════════════════════════════════════════════════════════════════════════
 elif st.session_state.page == "calculate":
     st.markdown('<div class="page-wrapper">', unsafe_allow_html=True)
 
@@ -426,6 +482,7 @@ elif st.session_state.page == "calculate":
     </div>
     """, unsafe_allow_html=True)
 
+    # Appliance selector
     st.markdown('<div class="glass-card">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">SELECT APPLIANCES</div>', unsafe_allow_html=True)
     selected = st.multiselect(
@@ -436,6 +493,8 @@ elif st.session_state.page == "calculate":
     st.markdown('</div>', unsafe_allow_html=True)
 
     hours_data: dict[str, float] = {}
+
+    # ── Inline row per appliance: name column | hours column ─────────────────
     if selected:
         st.markdown('<div class="glass-card">', unsafe_allow_html=True)
         st.markdown('<div class="section-title">DAILY USAGE HOURS</div>', unsafe_allow_html=True)
@@ -445,6 +504,7 @@ elif st.session_state.page == "calculate":
             unsafe_allow_html=True,
         )
 
+        # Column headers
         h1, h2 = st.columns([3, 2])
         with h1:
             st.markdown(
@@ -482,6 +542,8 @@ elif st.session_state.page == "calculate":
                 hours_data[appliance] = h
 
         st.markdown('</div>', unsafe_allow_html=True)
+
+        # ── Calculations ──────────────────────────────────────────────────────
         days = 30
         rows = []
         for app, h in hours_data.items():
@@ -502,6 +564,8 @@ elif st.session_state.page == "calculate":
         total_units = df["Units (kWh)"].sum()
         total_cost  = df["Cost (Rs)"].sum()
         total_co2   = df["CO2 (kg)"].sum()
+
+        # Summary stats
         st.markdown(f"""
         <div class="stat-row">
           <div class="stat-card">
@@ -522,6 +586,8 @@ elif st.session_state.page == "calculate":
           </div>
         </div>
         """, unsafe_allow_html=True)
+
+        # ── Animated bar chart ────────────────────────────────────────────────
         st.markdown('<div class="glass-card">', unsafe_allow_html=True)
         st.markdown('<div class="section-title">COST BREAKDOWN</div>', unsafe_allow_html=True)
 
@@ -567,6 +633,7 @@ elif st.session_state.page == "calculate":
         st.plotly_chart(fig_bar, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
+        # ── Area chart ────────────────────────────────────────────────────────
         st.markdown('<div class="glass-card">', unsafe_allow_html=True)
         st.markdown('<div class="section-title">ENERGY UNITS — AREA VIEW</div>', unsafe_allow_html=True)
 
@@ -603,6 +670,7 @@ elif st.session_state.page == "calculate":
         st.plotly_chart(fig_area, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
+        # ── AI Auditor ────────────────────────────────────────────────────────
         st.markdown('<div class="glass-card">', unsafe_allow_html=True)
         st.markdown('<div class="section-title">AI ENERGY AUDITOR REPORT</div>', unsafe_allow_html=True)
 
@@ -665,6 +733,11 @@ elif st.session_state.page == "calculate":
         """, unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  COMPARE
+# ══════════════════════════════════════════════════════════════════════════════
 elif st.session_state.page == "compare":
     st.markdown('<div class="page-wrapper">', unsafe_allow_html=True)
 
@@ -691,6 +764,7 @@ elif st.session_state.page == "compare":
     this_hours: dict[str, float] = {}
 
     if comp_selected:
+        # ── Inline 3-column row: appliance | last month | this month ─────────
         st.markdown('<div class="glass-card">', unsafe_allow_html=True)
         st.markdown('<div class="section-title">ENTER HOURS PER APPLIANCE</div>', unsafe_allow_html=True)
 
@@ -738,6 +812,8 @@ elif st.session_state.page == "compare":
                 this_hours[app] = th
 
         st.markdown('</div>', unsafe_allow_html=True)
+
+        # ── Build comparison dataframe ─────────────────────────────────────────
         days = 30
         cmp_rows = []
         for app in comp_selected:
@@ -787,6 +863,8 @@ elif st.session_state.page == "compare":
           </div>
         </div>
         """, unsafe_allow_html=True)
+
+        # ── Grouped bar ───────────────────────────────────────────────────────
         st.markdown('<div class="glass-card">', unsafe_allow_html=True)
         st.markdown('<div class="section-title">SIDE-BY-SIDE COST COMPARISON</div>', unsafe_allow_html=True)
 
@@ -819,6 +897,8 @@ elif st.session_state.page == "compare":
         )
         st.plotly_chart(fig_grp, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
+
+        # ── Delta chart ───────────────────────────────────────────────────────
         st.markdown('<div class="glass-card">', unsafe_allow_html=True)
         st.markdown('<div class="section-title">CHANGE ANALYSIS</div>', unsafe_allow_html=True)
 
@@ -844,6 +924,8 @@ elif st.session_state.page == "compare":
         )
         st.plotly_chart(fig_delta, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
+
+        # ── AI Auditor ────────────────────────────────────────────────────────
         st.markdown('<div class="glass-card">', unsafe_allow_html=True)
         st.markdown('<div class="section-title">AI AUDITOR — COMPARISON REPORT</div>', unsafe_allow_html=True)
 
@@ -913,6 +995,8 @@ elif st.session_state.page == "compare":
 
     st.markdown('</div>', unsafe_allow_html=True)
 
+
+# ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div style="text-align:center;margin-top:48px;padding:20px;
             color:rgba(255,255,255,0.55);font-size:0.72rem;
