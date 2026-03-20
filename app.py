@@ -1,70 +1,117 @@
 import streamlit as st
 import pandas as pd
-import time 
-st.set_page_config(page_title="EcoWatt India Pro", page_icon="⚡", layout="wide")
+import time
+
+st.set_page_config(page_title="EcoWatt India | Analytics", page_icon="⚡", layout="wide")
+
 st.markdown("""
     <style>
     .stApp {
-        background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
-                    url("https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80");
+        background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), 
+                    url("https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1350&q=80");
         background-size: cover;
+    }
+    .main-card {
+        background: rgba(255, 255, 255, 0.07);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 40px;
+        border: 1px solid rgba(255,255,255,0.1);
+        text-align: center;
+    }
+    .stButton>button {
+        width: 100%;
+        border-radius: 10px;
+        height: 3em;
+        background-color: #00d1b2;
         color: white;
+        font-weight: bold;
+        border: none;
     }
-    .report-card {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border-radius: 15px;
-        padding: 25px;
-        border: 1px solid rgba(255,255,255,0.2);
-        margin-bottom: 20px;
-    }
-    h1, h2, h3, p { color: white !important; }
+    h1, h2, h3 { color: #00d1b2 !important; }
     </style>
     """, unsafe_allow_html=True)
 
-st.title("EcoWatt AI: Smart Auditor")
-user_name = st.text_input("May I know your Good Name:", placeholder="e.g., Harsh")
+if 'page' not in st.session_state:
+    st.session_state.page = 'home'
 
-if user_name:
-    st.markdown("### Select your Appliances")
-    appliance_dict = {
-        "AC (1.5 Ton)": 1.5, "Fridge": 0.2, "Ceiling Fan": 0.07, 
-        "LED Lights": 0.05, "Geyser": 2.0, "Laptop": 0.1
-    }
+if st.session_state.page == 'home':
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<div class="main-card">', unsafe_allow_html=True)
+        st.title("ECOWATT INDIA")
+        st.write("Welcome to your Smart Energy Command Center. Please select an option to proceed.")
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Calculate This Month's Bill"):
+                st.session_state.page = 'calculate'
+                st.rerun()
+        with col2:
+            if st.button("Compare Monthly Usage"):
+                st.session_state.page = 'compare'
+                st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+elif st.session_state.page == 'calculate':
+    if st.button("Back to Menu"):
+        st.session_state.page = 'home'
+        st.rerun()
     
-    selected = st.multiselect("Pick appliances used today:", list(appliance_dict.keys()))
-
-    if selected:
-        usage_hours = {}
-        st.write("---")
-        cols = st.columns(len(selected))
-        for i, app in enumerate(selected):
-            with cols[i]:
-                usage_hours[app] = st.number_input(f"{app} (Hrs)", 0, 24, 1)
-
-        if st.button(" GENERATE AI AUDIT"):
-            with st.status("🤖 AI is analyzing your load profile...", expanded=True) as status:
-                st.write("Calculating kWh consumption...")
-                time.sleep(1)
-                st.write("Applying Indian Tariff rates (₹7/unit)...")
-                time.sleep(1)
-                st.write("Generating optimization remarks...")
-                time.sleep(1)
-                status.update(label=" Audit Complete!", state="complete", expanded=False)
-            total_kwh = sum(appliance_dict[app] * hrs for app, hrs in usage_hours.items())
-            monthly_bill = total_kwh * 30 * 7.0
-            st.markdown(f'<div class="report-card">', unsafe_allow_html=True)
-            st.header(f"Report for {user_name}")
-            c1, c2 = st.columns(2)
-            c1.metric("Daily Consumption", f"{total_kwh:.2f} kWh")
-            c2.metric("Est. Monthly Bill", f"₹{monthly_bill:,.2f}")
-            st.markdown('</div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="report-card" style="border-left: 5px solid #ff9933;">', unsafe_allow_html=True)
-            st.subheader(" AI Optimization Strategy")
-            if monthly_bill > 1500:
-                st.error(f"High usage detected! {user_name}, reducing AC by 2 hours can save ₹600/month.")
-            else:
-                st.success("Your energy footprint is efficient. Keep it up!")
-            st.markdown('</div>', unsafe_allow_html=True)
+    st.header("Monthly Bill Audit")
+    name = st.text_input("Customer Name")
+    
+    if name:
+        app_lib = {"AC": 1.5, "Fridge": 0.25, "Fan": 0.07, "Lights": 0.05, "Geyser": 2.0}
+        selected = st.multiselect("Select Appliances", list(app_lib.keys()))
+        
+        if selected:
+            costs = []
+            cols = st.columns(len(selected))
+            for i, app in enumerate(selected):
+                with cols[i]:
+                    hrs = st.number_input(f"{app} (Hrs)", 0.0, 24.0, 1.0)
+                    cost = hrs * app_lib[app] * 30 * 7.5
+                    costs.append({"Appliance": app, "Cost": cost})
             
-            st.bar_chart(pd.DataFrame({"App": list(usage_hours.keys()), "kWh": [appliance_dict[a]*usage_hours[a] for a in usage_hours]}).set_index("App"))
+            df = pd.DataFrame(costs)
+            total = df["Cost"].sum()
+            
+            st.metric("Estimated Bill", f"INR {total:,.2f}")
+            st.area_chart(df.set_index("Appliance"), color="#00d1b2")
+
+elif st.session_state.page == 'compare':
+    if st.button("Back to Menu"):
+        st.session_state.page = 'home'
+        st.rerun()
+        
+    st.header("Consumption Comparison")
+    st.write("Compare your current usage with the previous month to find leaks.")
+    
+    col_a, col_b = st.columns(2)
+    with col_a:
+        prev_bill = st.number_input("Last Month Total (INR)", value=1800.0)
+    with col_b:
+        curr_bill = st.number_input("This Month Total (INR)", value=2200.0)
+    
+    diff = curr_bill - prev_bill
+    percent = (diff / prev_bill) * 100 if prev_bill != 0 else 0
+    
+    st.markdown('<div class="main-card">', unsafe_allow_html=True)
+    c1, c2 = st.columns(2)
+    c1.metric("Current vs Last Month", f"INR {curr_bill}", f"{percent:.1f}%", delta_color="inverse")
+    
+    comp_data = pd.DataFrame({
+        "Month": ["Previous Month", "Current Month"],
+        "Bill Amount (INR)": [prev_bill, curr_bill]
+    })
+    
+    st.subheader("Financial Trend")
+    st.bar_chart(comp_data.set_index("Month"), color="#ff9933" if diff > 0 else "#00d1b2")
+    
+    if diff > 0:
+        st.error(f"Your bill increased by INR {diff:.2f}. Check your high-wattage appliance logs.")
+    else:
+        st.success(f"Great! You saved INR {abs(diff):.2f} compared to last month.")
+    st.markdown('</div>', unsafe_allow_html=True)
