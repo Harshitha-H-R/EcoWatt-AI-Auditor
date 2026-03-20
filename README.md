@@ -23,3 +23,6 @@ Experience the live application here: [ecowattindia.streamlit.app](https://ecowa
 To run this project locally, follow these steps:
 
 1. **Clone the repository:**
+git clone [https://github.com/Harshitha-H-R/EcoWatt-AI-Auditor](https://github.com/Harshitha-H-R/EcoWatt-AI-Auditor)
+Install dependencies: pip install -r requirements.txt
+un the application: streamlit run app.py
