@@ -8,6 +8,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+{
     "LED Bulb (9W)":            9,
     "Tube Light (40W)":         40,
     "Ceiling Fan (75W)":        75,
