@@ -61,7 +61,7 @@ if user_name:
             st.markdown('</div>', unsafe_allow_html=True)
             st.markdown(f'<div class="report-card" style="border-left: 5px solid #ff9933;">', unsafe_allow_html=True)
             st.subheader(" AI Optimization Strategy")
-            if monthly_bill > 2500:
+            if monthly_bill > 1500:
                 st.error(f"High usage detected! {user_name}, reducing AC by 2 hours can save ₹600/month.")
             else:
                 st.success("Your energy footprint is efficient. Keep it up!")
